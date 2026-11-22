@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- The 10.0.19041.0 suffix unlocks the Windows Runtime (WinRT) APIs,
+         including Windows.Devices.Enumeration which gives us DeviceWatcher. -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <!-- Lowest Windows build we promise to run on. -->
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Copy the tray image next to the .exe so the app can load it at runtime. -->
+    <None Update="tray_icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+
+# Debug artifacts
+*.log
+
+
+.env
+.env.*
+*.env
+secrets.json
+appsettings.*.Local.json
+*.pfx
+*.p12
+*.key
+*.pem
+credentials.json
+*.secret
