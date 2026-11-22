@@ -8,6 +8,8 @@ A lightweight Windows system-tray app that shows your **connected Bluetooth devi
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
 ![Language](https://img.shields.io/badge/C%23-WinForms-178600)
 
+![Bluetooth Battery Tray showing the tray menu and hover tooltip with a device and its battery percentage](preview.jpg)
+
 ## Features
 
 - 🔋 **Live battery levels** for connected Bluetooth devices (earbuds, headsets, BLE mice/keyboards, …).
