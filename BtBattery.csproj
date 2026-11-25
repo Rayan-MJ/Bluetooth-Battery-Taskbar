@@ -10,13 +10,13 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Icon shown on the .exe file itself (Explorer, taskbar button). -->
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Copy the tray image next to the .exe so the app can load it at runtime. -->
-    <None Update="tray_icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <!-- Bake the tray image into the .exe so it ships as a single self-contained file. -->
+    <EmbeddedResource Include="tray_icon.png" />
   </ItemGroup>
 
 </Project>

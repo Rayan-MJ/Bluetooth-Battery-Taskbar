@@ -69,9 +69,43 @@ public sealed class TrayContext : ApplicationContext
         }
 
         _menu.Items.Add(new ToolStripSeparator());
+
+        var startup = new ToolStripMenuItem("Start with Windows")
+        {
+            CheckOnClick = true,
+            Checked = StartsWithWindows(),
+        };
+        startup.Click += (s, e) => SetStartWithWindows(startup.Checked);
+        _menu.Items.Add(startup);
+
         var exit = new ToolStripMenuItem("Exit");
         exit.Click += (s, e) => ExitApp();
         _menu.Items.Add(exit);
+    }
+
+    private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string AppRunName = "BtBattery";
+
+    // True when our exe is registered to launch at login.
+    private static bool StartsWithWindows()
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(RunKey);
+        return key?.GetValue(AppRunName) is string v && !string.IsNullOrEmpty(v);
+    }
+
+    // Add/remove our exe path under the Run key to toggle launch-at-login.
+    private static void SetStartWithWindows(bool enable)
+    {
+        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(RunKey);
+        if (enable)
+        {
+            var exe = Environment.ProcessPath;
+            if (exe is not null) key.SetValue(AppRunName, $"\"{exe}\"");
+        }
+        else
+        {
+            key.DeleteValue(AppRunName, throwOnMissingValue: false);
+        }
     }
 
     // Hover tooltip: one line per connected device. Windows caps the text at 63 chars.
@@ -86,15 +120,15 @@ public sealed class TrayContext : ApplicationContext
         _tray.Text = text;
     }
 
-    // Load tray_icon.png, crop its transparent margins, and fit the artwork into a
-    // 32x32 square (preserving aspect ratio). Falls back to a system icon if missing.
+    // Load the embedded tray_icon.png, crop its transparent margins, and fit the
+    // artwork into a 32x32 square (preserving aspect ratio). Falls back to a system
+    // icon if the resource can't be read.
     private static Icon LoadTrayIcon()
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "tray_icon.png");
-        if (!File.Exists(path)) return SystemIcons.Application;
+        using var src = LoadEmbeddedImage("tray_icon.png");
+        if (src is null) return SystemIcons.Application;
 
         const int size = 32;
-        using var src = new Bitmap(path);
         var crop = OpaqueBounds(src);
 
         using var square = new Bitmap(size, size);
@@ -110,6 +144,21 @@ public sealed class TrayContext : ApplicationContext
             g.DrawImage(src, dest, crop, GraphicsUnit.Pixel);
         }
         return Icon.FromHandle(square.GetHicon());
+    }
+
+    // Read an image baked into the exe as an embedded resource. Returns an
+    // independent Bitmap (copied so it doesn't depend on the resource stream).
+    private static Bitmap? LoadEmbeddedImage(string fileName)
+    {
+        var asm = System.Reflection.Assembly.GetExecutingAssembly();
+        var name = asm.GetManifestResourceNames()
+                      .FirstOrDefault(n => n.EndsWith(fileName, StringComparison.OrdinalIgnoreCase));
+        if (name is null) return null;
+
+        using var stream = asm.GetManifestResourceStream(name);
+        if (stream is null) return null;
+        using var original = new Bitmap(stream);
+        return new Bitmap(original);
     }
 
     // Smallest rectangle containing all non-transparent pixels.
